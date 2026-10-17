@@ -1,0 +1,39 @@
+{
+  "created": "2026-10-17T15:33:07.002946-04:00",
+  "buy_date": "2026-10-23",
+  "budget": 75,
+  "core_us": "VTI",
+  "items": [
+    {
+      "ticker": "VTI",
+      "amount": 39,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "role": "core",
+      "label": "Core: US stock market"
+    },
+    {
+      "ticker": "VXUS",
+      "amount": 16,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "role": "core",
+      "label": "Core: international stocks"
+    },
+    {
+      "ticker": "BND",
+      "amount": 9,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "role": "core",
+      "label": "Core: bonds"
+    },
+    {
+      "ticker": "JNJ",
+      "amount": 11,
+      "reason": "Top-ranked essentials stock this week (score +3.19).",
+      "role": "satellite",
+      "label": "Satellite: Johnson & Johnson",
+      "buy_up_to": 263.23,
+      "great_below": 246.98,
+      "price_at_plan": 255.56
+    }
+  ]
+}
