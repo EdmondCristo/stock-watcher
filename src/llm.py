@@ -14,7 +14,7 @@ class LLM:
     def __init__(self, cfg: dict):
         self.provider = (cfg.get("provider") or "none").lower()
         self.model = cfg.get("model", "gemini-flash-latest")
-        self.groq_model = cfg.get("groq_model", "llama-3.3-70b-versatile")
+        self.groq_model = cfg.get("groq_model", "openai/gpt-oss-120b")
         # .strip() removes stray spaces / line breaks picked up when pasting a key into GitHub
         self.gemini_key = (os.getenv("GEMINI_API_KEY") or "").strip().strip('"').strip("'") or None
         self.groq_key = (os.getenv("GROQ_API_KEY") or "").strip().strip('"').strip("'") or None
@@ -54,18 +54,34 @@ class LLM:
         parts = r.json()["candidates"][0]["content"]["parts"]
         return "".join(p.get("text", "") for p in parts)
 
+    # Tried in order if a model isn't available to your account (404) — providers retire models often.
+    GROQ_FALLBACKS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"]
+
     def _groq(self, system: str, prompt: str) -> str:
-        r = requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={"Authorization": f"Bearer {self.groq_key}"},
-            json={"model": self.groq_model, "temperature": 0.2,
-                  "response_format": {"type": "json_object"},
-                  "messages": [{"role": "system", "content": system},
-                               {"role": "user", "content": prompt}]},
-            timeout=90,
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
+        models = [self.groq_model] + [m for m in self.GROQ_FALLBACKS if m != self.groq_model]
+        last = None
+        for model in models:
+            for json_mode in (True, False):
+                body = {"model": model, "temperature": 0.2,
+                        "messages": [{"role": "system", "content": system + "\nReply with valid JSON only."},
+                                     {"role": "user", "content": prompt}]}
+                if json_mode:
+                    body["response_format"] = {"type": "json_object"}
+                r = requests.post("https://api.groq.com/openai/v1/chat/completions",
+                                  headers={"Authorization": f"Bearer {self.groq_key}"}, json=body, timeout=90)
+                if r.status_code == 404:                 # model not offered → try the next one
+                    last = r
+                    break
+                if r.status_code == 400 and json_mode:   # model doesn't support JSON mode → retry plain
+                    last = r
+                    continue
+                r.raise_for_status()
+                if model != self.groq_model:
+                    print(f"[llm] using Groq model {model} (configured one unavailable)")
+                    self.groq_model = model
+                return r.json()["choices"][0]["message"]["content"]
+        last.raise_for_status()
+        raise RuntimeError("No Groq model available")
 
 
 def _parse_json(text: str) -> dict:
