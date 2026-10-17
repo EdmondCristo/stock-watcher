@@ -104,6 +104,52 @@
     "gain": 0.0,
     "gain_pct": 0.0
   },
+  "manager_tasks": {
+    "researcher": "Check news and earnings dates for the top candidates.",
+    "strategist": "Keep the core steady; pick the satellite stock with the best score and no red flags.",
+    "judge": "Check the budget, the 5% limit, and anything bought right before earnings.",
+    "extra_news": [],
+    "why": "Standard week.",
+    "source": "rule-based manager (add a free GEMINI_API_KEY for AI management)"
+  },
+  "debate": [
+    {
+      "round": 1,
+      "plan": [
+        {
+          "ticker": "VTI",
+          "amount": 39,
+          "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+        },
+        {
+          "ticker": "VXUS",
+          "amount": 16,
+          "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+        },
+        {
+          "ticker": "BND",
+          "amount": 9,
+          "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+        },
+        {
+          "ticker": "JNJ",
+          "amount": 11,
+          "reason": "Top-ranked essentials stock this week (score +3.19)."
+        }
+      ],
+      "strategist_note": "Following the standard plan: most money into broad index funds, a small slice into this week's top-ranked essentials stock.",
+      "disagree": "",
+      "judge_problems": [],
+      "rule_problems": [],
+      "n_problems": 0,
+      "judge_says": "Plan follows your rules.",
+      "outcome": "agreed"
+    }
+  ],
+  "memory_update": {
+    "add": []
+  },
+  "manager_summary": "The team reviewed last week, researched 22 essentials stocks, and settled this week's plan after 1 round of review. On Friday, follow the buy list below and check the morning email first.",
   "projection": {
     "low": {
       "value": 142996,
