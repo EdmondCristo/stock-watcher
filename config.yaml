@@ -33,7 +33,7 @@ news:
 
 llm:
   # gemini (free tier via Google AI Studio) | groq (free tier) | none (rule-based only)
-  provider: gemini
+  provider: groq
   # "gemini-flash-latest" always points at Google's current Flash model,
   # so it keeps working when Google retires older model versions.
   model: gemini-flash-latest
