@@ -86,39 +86,38 @@
     }
   ],
   "judge_overall": "Plan follows your rules.",
-  "judge_response_to_reviewer": "",
+  "judge_response_to_reviewer": "Applying the Reviewer's notes: Too early to judge your calls \u2014 need at least 4 weeks.",
   "review": {
-    "source": "Reviewer",
-    "first_week": true,
-    "summary": "This is your first week, so there's nothing to review yet. Starting next Sunday I'll grade each week's plan.",
+    "source": "rule-based reviewer (add a free GEMINI_API_KEY for AI coaching)",
+    "summary": "Last week's plan is up about $0.00 so far. Following the Judge for 1 week(s): you'd have put in $75, now worth about $75.",
     "judge_errors": [],
-    "for_researcher": "",
-    "for_strategist": "",
-    "for_judge": "",
-    "confidence_note": "",
+    "for_researcher": "Keep flagging earnings dates and negative company news.",
+    "for_strategist": "Stay diversified; avoid picking the same stock many weeks in a row.",
+    "for_judge": "Too early to judge your calls \u2014 need at least 4 weeks.",
+    "confidence_note": "One week of results is mostly luck; patterns over months matter more.",
     "date": "2026-10-17"
   },
   "totals_before": {
-    "weeks": 0,
-    "put_in": 0.0,
-    "worth_now": 0.0,
+    "weeks": 1,
+    "put_in": 75.0,
+    "worth_now": 75.0,
     "gain": 0.0,
     "gain_pct": 0.0
   },
   "projection": {
     "low": {
-      "value": 142825,
-      "todays_dollars": 78964,
+      "value": 142996,
+      "todays_dollars": 79059,
       "avg_return": 0.0349
     },
     "middle": {
-      "value": 200578,
-      "todays_dollars": 110894,
+      "value": 200882,
+      "todays_dollars": 111063,
       "avg_return": 0.0599
     },
     "high": {
-      "value": 286302,
-      "todays_dollars": 158289,
+      "value": 286835,
+      "todays_dollars": 158584,
       "avg_return": 0.0849
     },
     "you_put_in_future": 93600,
@@ -156,8 +155,8 @@
     "GIS": 33.13,
     "CLX": 87.09,
     "DG": 134.36,
-    "VXUS": 83.43,
+    "VTI": 374.07,
     "BND": 70.82,
-    "VTI": 374.07
+    "VXUS": 83.43
   }
 }
