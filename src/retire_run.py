@@ -9,6 +9,7 @@ from . import data, news
 from . import retire as R
 from . import history as H
 from .advisors import Judge, Researcher, Strategist
+from .team import Manager, debate, memory_for, save_memory, update_memory
 from .reviewer import Reviewer, feedback_for_agents, followed_totals, grade_last_week, project
 from .emailer import send
 from .indicators import add_indicators
@@ -72,19 +73,37 @@ def run_sunday(cfg: dict, demo: bool = False, dry_run: bool = False, save: bool 
     review["date"] = str(today)
     if save:
         H.save_lesson(review)
-    feedback = feedback_for_agents(H.load_lessons() if save else H.load_lessons() + [review])
+    lessons = H.load_lessons() if save else H.load_lessons() + [review]
 
-    # ── 1-3. Researcher → Strategist → Judge ──
+    # Reviewer as coach: update the team's long-term memory
+    memory, memory_update = update_memory(llm, review, lessons, str(today))
+    if save:
+        save_memory(memory)
+    feedback = feedback_for_agents(lessons)
+    for who in ("researcher", "strategist", "judge"):
+        feedback[f"for_{who}"] = memory_for(memory, who) + feedback.get(f"for_{who}", [])
+
+    # ── Manager AI hands out this week's tasks ──
+    manager = Manager(llm)
+    tasks = manager.assign(p, review, memory, list(table.index[:8]))
+    for t in tasks.get("extra_news", []):
+        if t in table.index and not table.at[t, "news"]:
+            arts = R._demo_news(t) if demo else news.fetch(t, None, 6, 7)
+            table.at[t, "news"] = [a.title for a in arts[:4]]
+            table.at[t, "sentiment"] = news.aggregate_sentiment(arts)
+
+    # ── Researcher → Strategist ⇄ Judge ──
     plan = R.base_plan(p, table, buy)
-    facts = Researcher(llm).fact_sheet(p, plan, table, feedback)
+    facts = Researcher(llm).fact_sheet(p, plan, table, feedback, tasks.get("researcher", ""))
     if "red_flag" in table.columns and table["red_flag"].fillna(False).any():
         plan = R.base_plan(p, table, buy)          # re-pick if the Researcher flagged the first choice
         facts["rules_only_plan"] = plan["items"]
         facts["skipped_this_week"] = plan["skipped"]
 
-    strategy = Strategist(llm).propose(facts, p, today.isocalendar()[1])
-    hard = R.check_plan(strategy["plan"], p, table)
-    verdict = Judge(llm).review(facts, strategy, hard)
+    strategist, judge = Strategist(llm), Judge(llm)
+    strategy = strategist.propose(facts, p, today.isocalendar()[1], tasks.get("strategist", ""))
+    strategy, verdict, transcript = debate(llm, strategist, judge, facts, strategy,
+                                           lambda pl: R.check_plan(pl, p, table), tasks.get("judge", ""), manager)
 
     final = verdict.get("approved_plan") or plan["items"]
     if R.check_plan(final, p, table):              # hard rules always win
@@ -99,7 +118,12 @@ def run_sunday(cfg: dict, demo: bool = False, dry_run: bool = False, save: bool 
         prices.update(_prices([t], table, demo))
     final = _enrich(final, p, table, prices)
 
-    body = render_sunday(p, plan, facts, strategy, verdict, final, table, buy, review, grade, totals, projection)
+    wrap = manager.wrap_up({"buy_day": f"{buy:%A}", "budget": p["weekly_budget"], "final_plan": final,
+                            "debate_rounds": len(transcript), "debate_outcome": transcript[-1].get("outcome"),
+                            "judge_overall": verdict.get("overall"), "reviewer_summary": review.get("summary"),
+                            "n_candidates": len(table)})
+    team = {"tasks": tasks, "transcript": transcript, "memory": memory, "memory_update": memory_update, "wrap": wrap}
+    body = render_sunday(p, plan, facts, strategy, verdict, final, table, buy, review, grade, totals, projection, team)
     if save:
         R.save_plan({"created": datetime.now(NY).isoformat(), "buy_date": str(buy), "budget": p["weekly_budget"],
                      "core_us": p["core_funds"]["us_stocks"], "items": final})
@@ -110,7 +134,8 @@ def run_sunday(cfg: dict, demo: bool = False, dry_run: bool = False, save: bool 
                        "big_idea": strategy.get("big_idea"), "judge_verdicts": verdict.get("verdicts"),
                        "judge_overall": verdict.get("overall"),
                        "judge_response_to_reviewer": verdict.get("response_to_reviewer"),
-                       "review": review, "totals_before": totals, "projection": projection,
+                       "review": review, "totals_before": totals, "manager_tasks": tasks,
+                       "debate": transcript, "memory_update": memory_update, "manager_summary": wrap, "projection": projection,
                        "prices_at_plan": prices})
         H.append_scorecard([{"week": str(today), "buy_date": str(buy), "ticker": i["ticker"], "role": i["role"],
                              "amount": i["amount"], "price_at_plan": i.get("price_at_plan"),
@@ -174,8 +199,39 @@ def _pct(v):
     return "—" if v is None or v != v else f"{v:.0%}"
 
 
+def render_team_top(team) -> str:
+    t = team["tasks"]
+    return f"""<div style="padding:10px 14px;background:#eef2ff;border-radius:8px;margin:8px 0">
+<b>Manager's summary:</b> {e(team['wrap'])}
+<p style="font-size:12px;margin:8px 0 2px"><b>This week's assignments</b> ({e(t.get('source', ''))}): {e(t.get('why', ''))}</p>
+<ul style="font-size:12px;margin:2px 0">
+<li><b>Reviewer:</b> grade last week and update team memory</li>
+<li><b>Researcher:</b> {e(t.get('researcher', ''))}{(' Extra news check: ' + e(', '.join(t['extra_news']))) if t.get('extra_news') else ''}</li>
+<li><b>Strategist:</b> {e(t.get('strategist', ''))}</li>
+<li><b>Judge:</b> {e(t.get('judge', ''))}</li></ul></div>"""
+
+
+def render_debate(team) -> str:
+    rows = ""
+    for d in team["transcript"]:
+        probs = [f"{p.get('ticker')}: {p.get('reason')}" for p in d["judge_problems"] + d["rule_problems"]]
+        ext = d.get("manager_extension")
+        rows += (f"<li><b>Round {d['round']}</b> — Strategist: {e(str(d.get('strategist_note') or ''))}"
+                 f"{(' <i>(pushed back: ' + e(d['disagree']) + ')</i>') if d.get('disagree') else ''}<br>"
+                 f"Judge: {e(str(d.get('judge_says') or ''))} "
+                 f"{('<span style=color:#b91c1c>' + e('; '.join(probs)) + '</span>') if probs else '✅ no problems'}"
+                 f"{('<br>Manager on extra rounds: ' + ('approved' if ext['extend'] else 'declined') + ' — ' + e(ext['reason'])) if ext else ''}"
+                 f"{('<br><b>Outcome: ' + e(d['outcome']) + '</b>') if d.get('outcome') else ''}</li>")
+    mem = "".join(f"<li>[{e(m['for'])}] {e(m['lesson'])} <span style='color:#888'>(confirmed {m.get('times_confirmed', 1)}×)</span></li>"
+                  for m in team["memory"])
+    return (f"<h3>2b. Strategist ⇄ Judge debate ({len(team['transcript'])} round"
+            f"{'s' if len(team['transcript']) != 1 else ''}, limit 4, max 10)</h3><ol style='font-size:13px;list-style:none;padding-left:0'>{rows}</ol>"
+            + (f"<p style='font-size:13px;margin:6px 0 2px'><b>Team memory</b> (long-term lessons the Reviewer keeps):</p>"
+               f"<ul style='font-size:12px'>{mem}</ul>" if mem else ""))
+
+
 def render_sunday(p, plan, facts, strategy, verdict, final, table, buy, review=None, grade=None, totals=None,
-                  projection=None) -> str:
+                  projection=None, team=None) -> str:
     tgt, cur = plan["targets"], plan["current"]
     mix_rows = "".join(
         f"<tr><td>{e(k if k != 'SATELLITE' else 'Individual stocks')}</td><td>{_pct(v)}</td><td>{_pct(cur.get(k)) if cur else '—'}</td></tr>"
@@ -204,11 +260,13 @@ def render_sunday(p, plan, facts, strategy, verdict, final, table, buy, review=N
 <h2 style="margin-bottom:4px">Your plan for {buy:%A, %B %d}</h2>
 <p style="margin-top:0;color:#555">${p['weekly_budget']} this week · {p['years_to_retirement']} years to retirement.
 You'll get a quick go/wait check that morning before the market opens.</p>
+{render_team_top(team) if team else ""}
 {render_review(review, grade, totals, projection, verdict) if review else ""}
 <h3>1. What to buy on {buy:%A}</h3>
 <table style="border-collapse:collapse;width:100%" border="1" cellpadding="0">{buy_rows}</table>
 <h3>2. The Judge's review</h3>
 <p style="margin:4px 0">{e(str(verdict.get('overall', '')))}</p><ul style="font-size:13px">{verdict_rows}</ul>
+{render_debate(team) if team else ""}
 <h3>3. The Strategist's thinking</h3>
 <p style="margin:4px 0">{e(strategy.get('summary', ''))}</p>
 <p style="margin:8px 0;padding:8px 12px;background:#f5f5f4;border-radius:6px"><b>💡 Big idea:</b> {e(strategy.get('big_idea', ''))}<br>

@@ -45,7 +45,7 @@ RESEARCHER_SYSTEM = """You are a careful financial researcher. You do NOT give a
 For each stock you get numbers and recent headlines. Summarize what the headlines actually say about
 the business in one plain-English sentence a beginner understands, and flag anything that could hurt
 a long-term owner (lawsuits, recalls, dividend cuts, guidance cuts, big debt, accounting issues).
-If "reviewer_feedback" is included, follow it.
+If "reviewer_feedback" or "manager_focus" is included, follow it.
 Respond with JSON only: {"TICKER": {"summary": str, "red_flag": bool, "flag_reason": str}, ...}"""
 
 
@@ -53,16 +53,20 @@ class Researcher:
     def __init__(self, llm: LLM):
         self.llm = llm
 
-    def fact_sheet(self, p: dict, plan: dict, table: pd.DataFrame, feedback: dict | None = None) -> dict:
+    def fact_sheet(self, p: dict, plan: dict, table: pd.DataFrame, feedback: dict | None = None,
+                   focus: str = "") -> dict:
         feedback = feedback or {}
         cands = _records(table, 8)
         with_news = {c["ticker"]: {"headlines": c.get("news") or [], "sentiment": c.get("sentiment")}
                      for c in cands if c.get("news")}
         if with_news and feedback.get("for_researcher"):
             with_news["reviewer_feedback"] = feedback["for_researcher"]
+        if with_news and focus:
+            with_news["manager_focus"] = focus
         notes = self.llm.ask_json(RESEARCHER_SYSTEM, json.dumps(with_news)) if with_news else None
         if notes:
             notes.pop("reviewer_feedback", None)
+            notes.pop("manager_focus", None)
         for c in cands:
             n = (notes or {}).get(c["ticker"]) or {}
             if n:
@@ -125,8 +129,10 @@ class Strategist:
     def __init__(self, llm: LLM):
         self.llm = llm
 
-    def propose(self, facts: dict, p: dict, week_no: int) -> dict:
+    def propose(self, facts: dict, p: dict, week_no: int, focus: str = "") -> dict:
         sys = STRATEGIST_SYSTEM.format(years=p["years_to_retirement"], buy_day=p.get("buy_day", "Friday"))
+        if focus:
+            sys += f"\nThe Manager asked you to focus on this week: {focus}"
         res = self.llm.ask_json(sys, json.dumps(facts, default=str))
         if res and isinstance(res.get("plan"), list) and res["plan"]:
             res["source"] = "AI strategist"
@@ -160,15 +166,23 @@ Respond with JSON only:
  "idea_verdict": {"verdict": "OK|RISKY|WRONG", "reason": str},
  "approved_plan": [{"ticker": str, "amount": int}],
  "overall": "2 sentences: what was right and what was wrong with the advice",
- "response_to_reviewer": "1-2 sentences"}"""
+ "response_to_reviewer": "1-2 sentences",
+ "all_ok": true if every item is OK and the plan can be used as-is,
+ "continue": true ONLY if the plan is not OK yet but the Strategist is close and one more round would likely fix it}
+
+This may be one round of a back-and-forth with the Strategist ("debate" in the payload shows earlier rounds).
+If the Strategist fixed what you asked, say so. Don't invent new objections each round just to keep going.
+"manager_focus" (if present) is what the Manager asked you to pay special attention to this week."""
 
 
 class Judge:
     def __init__(self, llm: LLM):
         self.llm = llm
 
-    def review(self, facts: dict, strategy: dict, hard_problems: list[dict]) -> dict:
-        payload = {"facts": facts, "strategist": strategy, "automatic_rule_check": hard_problems}
+    def review(self, facts: dict, strategy: dict, hard_problems: list[dict], debate: list | None = None,
+               focus: str = "") -> dict:
+        payload = {"facts": facts, "strategist": strategy, "automatic_rule_check": hard_problems,
+                   "debate": debate or [], "manager_focus": focus}
         res = self.llm.ask_json(JUDGE_SYSTEM, json.dumps(payload, default=str))
         if res and isinstance(res.get("approved_plan"), list):
             res["source"] = "AI judge"
@@ -184,7 +198,7 @@ class Judge:
                 verdicts.append(pr)
         approved = strategy["plan"] if not bad else [
             {"ticker": i["ticker"], "amount": i["amount"]} for i in facts["rules_only_plan"]]
-        return {"verdicts": verdicts, "approved_plan": approved,
+        return {"verdicts": verdicts, "approved_plan": approved, "all_ok": not bad, "continue": False,
                 "idea_verdict": ({"verdict": "OK", "reason": "A standard, low-risk habit for long-term investors."}
                                  if strategy.get("big_idea") in EVERGREEN_IDEAS else
                                  {"verdict": "RISKY", "reason": "Couldn't be reviewed by the AI Judge — think it over before acting."}),

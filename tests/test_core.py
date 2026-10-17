@@ -93,3 +93,37 @@ def test_reviewer_projection_and_totals():
     assert g["judge_calls"][0]["outcome"] == "helped"
     t = followed_totals([rec], now)
     assert t["put_in"] == 75 and round(t["worth_now"], 2) == 82.5
+
+
+class _FakeLLM:
+    available = True
+
+    def __init__(self, progress: bool):
+        self.progress, self.r = progress, 0
+
+    def ask_json(self, system, prompt):
+        if system.startswith("You are the Manager AI. The Strategist"):
+            return {"extend": True, "reason": "test"}
+        if system.startswith("You are the Strategist. The Judge"):
+            return {"plan": [{"ticker": "VTI", "amount": 75}], "changes": "x"}
+        return {}
+
+
+class _FakeJudge:
+    def __init__(self, llm):
+        self.llm = llm
+
+    def review(self, facts, strategy, hard, debate, focus):
+        self.llm.r += 1
+        n = (30 - self.llm.r) if self.llm.progress else 3
+        return {"verdicts": [{"ticker": "X", "verdict": "RISKY", "reason": "r"}] * n,
+                "all_ok": False, "continue": True, "overall": ""}
+
+
+def test_debate_stops_at_4_without_progress_and_10_max():
+    from src.team import Manager, debate
+    for progress, expected in ((False, 4), (True, 10)):
+        llm = _FakeLLM(progress)
+        _, _, t = debate(llm, None, _FakeJudge(llm), {}, {"plan": [{"ticker": "VTI", "amount": 75}]},
+                         lambda pl: [], "", Manager(llm))
+        assert len(t) == expected, (progress, len(t))

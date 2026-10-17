@@ -77,6 +77,12 @@ rejections helped or hurt, totals what you'd have if you followed the Judge ever
 to retirement (low / middle / high, plus in today's dollars), and sends written feedback that the
 other three read and the Judge replies to.
 
+A **Manager AI** then hands out the week's tasks (a focus for each AI, extra news checks), the
+**Strategist and Judge debate** (up to 4 rounds; 5–10 only if the Judge says it's close, problems are
+shrinking, and the Manager approves), and the Manager writes the summary at the top of the email.
+The Reviewer also keeps **team memory** (`state/history/team_memory.json`): long-term lessons every AI
+reads each week until the Reviewer retires them.
+
 Everything is saved in `state/history/`: one `…-plan.json` and a viewable `…-report.html` per week,
 `scorecard.csv` (every purchase), and `lessons.json` (the Reviewer's feedback).
 
