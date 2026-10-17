@@ -15,8 +15,9 @@ class LLM:
         self.provider = (cfg.get("provider") or "none").lower()
         self.model = cfg.get("model", "gemini-flash-latest")
         self.groq_model = cfg.get("groq_model", "llama-3.3-70b-versatile")
-        self.gemini_key = os.getenv("GEMINI_API_KEY")
-        self.groq_key = os.getenv("GROQ_API_KEY")
+        # .strip() removes stray spaces / line breaks picked up when pasting a key into GitHub
+        self.gemini_key = (os.getenv("GEMINI_API_KEY") or "").strip().strip('"').strip("'") or None
+        self.groq_key = (os.getenv("GROQ_API_KEY") or "").strip().strip('"').strip("'") or None
 
     @property
     def available(self) -> bool:
