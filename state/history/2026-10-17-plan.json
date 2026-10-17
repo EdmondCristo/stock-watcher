@@ -1,0 +1,163 @@
+{
+  "date": "2026-10-17",
+  "buy_date": "2026-10-23",
+  "budget": 75,
+  "core_us": "VTI",
+  "final": [
+    {
+      "ticker": "VTI",
+      "amount": 39,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "role": "core",
+      "label": "Core: US stock market",
+      "price_at_plan": 374.07
+    },
+    {
+      "ticker": "VXUS",
+      "amount": 16,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "role": "core",
+      "label": "Core: international stocks",
+      "price_at_plan": 83.43
+    },
+    {
+      "ticker": "BND",
+      "amount": 9,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "role": "core",
+      "label": "Core: bonds",
+      "price_at_plan": 70.82
+    },
+    {
+      "ticker": "JNJ",
+      "amount": 11,
+      "reason": "Top-ranked essentials stock this week (score +3.19).",
+      "role": "satellite",
+      "label": "Satellite: Johnson & Johnson",
+      "buy_up_to": 263.23,
+      "great_below": 246.98,
+      "price_at_plan": 255.56
+    }
+  ],
+  "strategist_plan": [
+    {
+      "ticker": "VTI",
+      "amount": 39,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+    },
+    {
+      "ticker": "VXUS",
+      "amount": 16,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+    },
+    {
+      "ticker": "BND",
+      "amount": 9,
+      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+    },
+    {
+      "ticker": "JNJ",
+      "amount": 11,
+      "reason": "Top-ranked essentials stock this week (score +3.19)."
+    }
+  ],
+  "strategist_summary": "Following the standard plan: most money into broad index funds, a small slice into this week's top-ranked essentials stock.",
+  "big_idea": "Set up an automatic weekly transfer to your brokerage on payday so investing happens even on busy weeks.",
+  "judge_verdicts": [
+    {
+      "ticker": "VTI",
+      "verdict": "OK",
+      "reason": "Matches the facts and the rules."
+    },
+    {
+      "ticker": "VXUS",
+      "verdict": "OK",
+      "reason": "Matches the facts and the rules."
+    },
+    {
+      "ticker": "BND",
+      "verdict": "OK",
+      "reason": "Matches the facts and the rules."
+    },
+    {
+      "ticker": "JNJ",
+      "verdict": "OK",
+      "reason": "Matches the facts and the rules."
+    }
+  ],
+  "judge_overall": "Plan follows your rules.",
+  "judge_response_to_reviewer": "",
+  "review": {
+    "source": "Reviewer",
+    "first_week": true,
+    "summary": "This is your first week, so there's nothing to review yet. Starting next Sunday I'll grade each week's plan.",
+    "judge_errors": [],
+    "for_researcher": "",
+    "for_strategist": "",
+    "for_judge": "",
+    "confidence_note": "",
+    "date": "2026-10-17"
+  },
+  "totals_before": {
+    "weeks": 0,
+    "put_in": 0.0,
+    "worth_now": 0.0,
+    "gain": 0.0,
+    "gain_pct": 0.0
+  },
+  "projection": {
+    "low": {
+      "value": 142825,
+      "todays_dollars": 78964,
+      "avg_return": 0.0349
+    },
+    "middle": {
+      "value": 200578,
+      "todays_dollars": 110894,
+      "avg_return": 0.0599
+    },
+    "high": {
+      "value": 286302,
+      "todays_dollars": 158289,
+      "avg_return": 0.0849
+    },
+    "you_put_in_future": 93600,
+    "years": 24,
+    "assumptions": {
+      "us": 0.07,
+      "intl": 0.065,
+      "bonds": 0.04,
+      "satellite": 0.07,
+      "scenario_spread": 0.025,
+      "inflation": 0.025,
+      "yearly_budget_increase": 0.0
+    }
+  },
+  "prices_at_plan": {
+    "KO": 93.9,
+    "JNJ": 255.56,
+    "DUK": 121.47,
+    "NEE": 79.8,
+    "PG": 159.35,
+    "PEP": 131.49,
+    "RSG": 231.54,
+    "UL": 66.16,
+    "WM": 226.86,
+    "CL": 94.11,
+    "MDLZ": 63.91,
+    "ABT": 104.89,
+    "WMT": 118.81,
+    "COST": 989.11,
+    "HSY": 170.83,
+    "KMB": 105.57,
+    "ECL": 288.89,
+    "CHD": 104.53,
+    "KVUE": 18.91,
+    "GIS": 33.13,
+    "CLX": 87.09,
+    "DG": 134.36,
+    "VXUS": 83.43,
+    "BND": 70.82,
+    "VTI": 374.07
+  }
+}
