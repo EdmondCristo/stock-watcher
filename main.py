@@ -5,6 +5,8 @@
     python main.py watch --dry-run     # print emails instead of sending
     python main.py watch --demo        # offline test with synthetic prices & headlines
     python main.py consult             # weekly 'people still need soap' consultant memo
+    python main.py retire              # Sunday retirement plan (Researcher → Strategist → Judge)
+    python main.py friday              # buy-day morning go / wait check
 
 Educational tool — not financial advice.
 """
@@ -236,12 +238,16 @@ def cmd_consult(args, cfg) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["watch", "consult"])
+    ap.add_argument("command", choices=["watch", "consult", "retire", "friday"])
     ap.add_argument("--force", action="store_true", help="run even if market closed / ignore cooldown")
     ap.add_argument("--dry-run", action="store_true", help="print emails instead of sending")
     ap.add_argument("--demo", action="store_true", help="offline synthetic data (implies --dry-run)")
     args = ap.parse_args(argv)
     cfg = load_cfg()
+    if args.command in ("retire", "friday"):
+        from src import retire_run
+        fn = retire_run.run_sunday if args.command == "retire" else retire_run.run_friday
+        return fn(cfg, demo=args.demo, dry_run=args.dry_run)
     return cmd_watch(args, cfg) if args.command == "watch" else cmd_consult(args, cfg)
 
 

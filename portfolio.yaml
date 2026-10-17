@@ -1,0 +1,32 @@
+# ─────────────────────────────────────────────────────────────
+#  Retirement plan settings. No dollar balances, no account numbers.
+# ─────────────────────────────────────────────────────────────
+
+# How much you plan to invest each week (you said $50–$100).
+weekly_budget: 75
+
+years_to_retirement: 24
+buy_day: Friday
+
+# The "core": broad, low-cost index funds — the main engine of growth.
+# These are common examples; swap in your brokerage's equivalents if you prefer.
+core_funds:
+  us_stocks: VTI       # whole US stock market
+  intl_stocks: VXUS    # stocks outside the US
+  bonds: BND           # bonds — the "safety cushion", grows as retirement nears
+
+us_share_of_stocks: 0.70   # of your core stock money, 70% US / 30% international
+
+# The "satellite": hand-picked "people still need soap" stocks (list is in config.yaml → consultant.universe).
+satellite_share: 0.15      # 15% of each week's money goes to one individual stock
+max_single_stock: 0.05     # never let one stock grow past 5% of your whole portfolio
+
+# Your CURRENT mix, in PERCENT of your total portfolio. No dollars.
+# Starting fresh? Leave it as {} — the plan will just follow the targets.
+# Update it every month or so from your brokerage app.
+holdings: {}
+#  VTI: 60
+#  VXUS: 22
+#  BND: 12
+#  CL: 3
+#  PG: 3

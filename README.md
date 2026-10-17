@@ -64,6 +64,20 @@ Secrets are encrypted and never visible in logs, even in a public repo.
 
 That's it — it runs on its own from here.
 
+## Retirement planner (Sunday plan → Friday buy)
+
+Every **Sunday** three AIs build your plan for the coming **Friday**:
+1. **Researcher** gathers facts: prices, fundamentals, news, earnings and dividend dates.
+2. **Strategist** proposes the buy plan (core index funds + one essentials stock) and one bigger idea.
+3. **Judge** checks every suggestion and marks it ✅ OK, ⚠️ risky, or ❌ wrong. Hard safety rules
+   (budget, max 5% per stock, no buying right before earnings) always win, even over the AIs.
+
+**Friday ~7:45 AM ET** you get a short go / wait email. If the stock jumped out of its buy range
+or bad news came out, its money moves into the US index fund instead.
+
+Edit `portfolio.yaml` for your weekly budget and (optionally) your current mix **in percentages**.
+No dollar balances or account numbers are ever needed. Keep the repo **private**.
+
 ## Customise
 Everything lives in `config.yaml`: watchlist, EMA/BB periods, band tolerance, probability horizon,
 alert threshold, cooldown, consultant universe. Edit on GitHub (pencil icon) and commit.
