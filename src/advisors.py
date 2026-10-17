@@ -45,6 +45,7 @@ RESEARCHER_SYSTEM = """You are a careful financial researcher. You do NOT give a
 For each stock you get numbers and recent headlines. Summarize what the headlines actually say about
 the business in one plain-English sentence a beginner understands, and flag anything that could hurt
 a long-term owner (lawsuits, recalls, dividend cuts, guidance cuts, big debt, accounting issues).
+If "reviewer_feedback" is included, follow it.
 Respond with JSON only: {"TICKER": {"summary": str, "red_flag": bool, "flag_reason": str}, ...}"""
 
 
@@ -52,11 +53,16 @@ class Researcher:
     def __init__(self, llm: LLM):
         self.llm = llm
 
-    def fact_sheet(self, p: dict, plan: dict, table: pd.DataFrame) -> dict:
+    def fact_sheet(self, p: dict, plan: dict, table: pd.DataFrame, feedback: dict | None = None) -> dict:
+        feedback = feedback or {}
         cands = _records(table, 8)
         with_news = {c["ticker"]: {"headlines": c.get("news") or [], "sentiment": c.get("sentiment")}
                      for c in cands if c.get("news")}
+        if with_news and feedback.get("for_researcher"):
+            with_news["reviewer_feedback"] = feedback["for_researcher"]
         notes = self.llm.ask_json(RESEARCHER_SYSTEM, json.dumps(with_news)) if with_news else None
+        if notes:
+            notes.pop("reviewer_feedback", None)
         for c in cands:
             n = (notes or {}).get(c["ticker"]) or {}
             if n:
@@ -79,6 +85,7 @@ class Researcher:
             "rules_only_plan": plan["items"],
             "satellite_candidates": cands,
             "skipped_this_week": plan["skipped"],
+            "reviewer_feedback": feedback,
             "source": "AI researcher" if notes else "rule-based researcher",
         }
 
@@ -96,6 +103,7 @@ You get a fact sheet and a rules-only starting plan for the coming {buy_day}. Im
 - Do NOT try to time the core index funds; buy them every week.
 - Avoid stocks with an earnings report before buy day or a red flag, unless you explain clearly.
 - If the satellite stock pays an ex-dividend date before buy day, mention it.
+Read "reviewer_feedback" in the facts (lessons from past weeks) and apply it.
 Also give ONE bigger creative idea for the investor to think about (not part of this week's plan) —
 e.g. a habit, an account feature, a long-term theme. Keep it practical and honest.
 
@@ -140,6 +148,8 @@ Check every item of the Strategist's plan against the facts and these rules:
 - no single stock above the max weight; no earnings before buy day; no red-flag stock without good reason
 - reasons must match the facts (call out anything the Strategist claimed that the data doesn't support)
 Also judge the big idea: is it sound and relevant for a beginner?
+The Reviewer graded past weeks; its feedback is in facts.reviewer_feedback ("for_judge", "judge_errors").
+Answer the Reviewer directly: say what you are correcting this week, or explain politely why you disagree.
 
 Mark each item OK, RISKY, or WRONG with a one-sentence reason in plain English.
 Then give the approved plan: keep the Strategist's items you marked OK; replace RISKY/WRONG ones
@@ -149,7 +159,8 @@ Respond with JSON only:
 {"verdicts": [{"ticker": str, "verdict": "OK|RISKY|WRONG", "reason": str}],
  "idea_verdict": {"verdict": "OK|RISKY|WRONG", "reason": str},
  "approved_plan": [{"ticker": str, "amount": int}],
- "overall": "2 sentences: what was right and what was wrong with the advice"}"""
+ "overall": "2 sentences: what was right and what was wrong with the advice",
+ "response_to_reviewer": "1-2 sentences"}"""
 
 
 class Judge:
@@ -177,6 +188,8 @@ class Judge:
                 "idea_verdict": ({"verdict": "OK", "reason": "A standard, low-risk habit for long-term investors."}
                                  if strategy.get("big_idea") in EVERGREEN_IDEAS else
                                  {"verdict": "RISKY", "reason": "Couldn't be reviewed by the AI Judge — think it over before acting."}),
+                "response_to_reviewer": ("Applying the Reviewer's notes: " + "; ".join(facts["reviewer_feedback"].get("for_judge", [])[-1:])
+                                         if facts.get("reviewer_feedback", {}).get("for_judge") else ""),
                 "overall": "Plan follows your rules." if not bad else
                            "Some suggestions broke your rules, so the safe rules-only plan is used instead.",
                 "source": "rule-based judge (add a free GEMINI_API_KEY for AI review)"}

@@ -7,7 +7,9 @@ from zoneinfo import ZoneInfo
 
 from . import data, news
 from . import retire as R
+from . import history as H
 from .advisors import Judge, Researcher, Strategist
+from .reviewer import Reviewer, feedback_for_agents, followed_totals, grade_last_week, project
 from .emailer import send
 from .indicators import add_indicators
 from .llm import LLM
@@ -18,7 +20,7 @@ BADGE = {"OK": ("✅", "#15803d"), "RISKY": ("⚠️", "#a16207"), "WRONG": ("�
          "GO": ("✅", "#15803d"), "WAIT": ("⏸️", "#a16207"), "CHANGED": ("🔄", "#1d4ed8")}
 
 
-def _enrich(items: list[dict], p: dict, table) -> list[dict]:
+def _enrich(items: list[dict], p: dict, table, prices: dict) -> list[dict]:
     cf = p["core_funds"]
     labels = {cf["us_stocks"].upper(): "Core: US stock market", cf["intl_stocks"].upper(): "Core: international stocks",
               cf["bonds"].upper(): "Core: bonds"}
@@ -27,7 +29,7 @@ def _enrich(items: list[dict], p: dict, table) -> list[dict]:
         t = str(i["ticker"]).upper()
         d = {"ticker": t, "amount": int(round(float(i["amount"]))), "reason": i.get("reason", "")}
         if t in labels:
-            d.update(role="core", label=labels[t])
+            d.update(role="core", label=labels[t], price_at_plan=prices.get(t))
         else:
             row = table.loc[t]
             d.update(role="satellite", label=f"Satellite: {row.get('name') or t}", **R.buy_range(row))
@@ -35,17 +37,46 @@ def _enrich(items: list[dict], p: dict, table) -> list[dict]:
     return out
 
 
+def _prices(tickers, table, demo: bool) -> dict:
+    """Latest close for every ticker we need (researched stocks, core funds, anything bought before)."""
+    out = {t: round(float(table.loc[t, "price"]), 2) for t in table.index}
+    for t in {str(x).upper() for x in tickers} - set(out):
+        try:
+            raw = data.demo_history(t, crash_end=False) if demo else data.get_history(t, 1)
+            out[t] = round(float(raw["Close"].iloc[-1]), 2)
+        except Exception as ex:
+            print(f"[prices] {t}: {ex}")
+    return out
+
+
 # ───────────────────────── Sunday ─────────────────────────
 
-def run_sunday(cfg: dict, demo: bool = False, dry_run: bool = False) -> int:
+def run_sunday(cfg: dict, demo: bool = False, dry_run: bool = False, save: bool | None = None) -> int:
+    save = (not demo) if save is None else save
     p = R.load_portfolio()
     llm = LLM(cfg.get("llm", {}))
     today = datetime.now(NY).date()
     buy = R.next_buy_date(today, p.get("buy_day", "Friday"))
     table = R.research_satellites(cfg["consultant"]["universe"], p, today, buy, demo=demo)
 
+    # ── 0. Reviewer: grade last week, project 24 years, send feedback ──
+    records = H.load_records()
+    last = records[-1] if records else None
+    ever_bought = {i["ticker"] for r in records for i in r.get("final", [])}
+    ever_bought |= {str(s.get("ticker", "")).upper() for r in records for s in r.get("strategist_plan", [])}
+    prices = _prices(set(p["core_funds"].values()) | ever_bought, table, demo)
+    grade = grade_last_week(last, prices) if last else None
+    totals = followed_totals(records, prices)
+    projection = project(p, totals["worth_now"], p["years_to_retirement"])
+    review = Reviewer(llm).review(last, grade, totals, projection, H.load_lessons())
+    review["date"] = str(today)
+    if save:
+        H.save_lesson(review)
+    feedback = feedback_for_agents(H.load_lessons() if save else H.load_lessons() + [review])
+
+    # ── 1-3. Researcher → Strategist → Judge ──
     plan = R.base_plan(p, table, buy)
-    facts = Researcher(llm).fact_sheet(p, plan, table)
+    facts = Researcher(llm).fact_sheet(p, plan, table, feedback)
     if "red_flag" in table.columns and table["red_flag"].fillna(False).any():
         plan = R.base_plan(p, table, buy)          # re-pick if the Researcher flagged the first choice
         facts["rules_only_plan"] = plan["items"]
@@ -64,24 +95,87 @@ def run_sunday(cfg: dict, demo: bool = False, dry_run: bool = False) -> int:
     for i in final:
         i.setdefault("reason", reasons.get(str(i["ticker"]).upper()) or next(
             (b["reason"] for b in plan["items"] if b["ticker"] == i["ticker"]), ""))
-    final = _enrich(final, p, table)
+    for t in {str(s.get("ticker", "")).upper() for s in strategy["plan"]} - set(prices):
+        prices.update(_prices([t], table, demo))
+    final = _enrich(final, p, table, prices)
 
-    saved = {"created": datetime.now(NY).isoformat(), "buy_date": str(buy), "budget": p["weekly_budget"],
-             "core_us": p["core_funds"]["us_stocks"], "items": final}
-    if not demo:
-        R.save_plan(saved)
+    body = render_sunday(p, plan, facts, strategy, verdict, final, table, buy, review, grade, totals, projection)
+    if save:
+        R.save_plan({"created": datetime.now(NY).isoformat(), "buy_date": str(buy), "budget": p["weekly_budget"],
+                     "core_us": p["core_funds"]["us_stocks"], "items": final})
+        verdict_by_t = {str(v.get("ticker")).upper(): v.get("verdict") for v in verdict.get("verdicts", [])}
+        H.save_record({"date": str(today), "buy_date": str(buy), "budget": p["weekly_budget"],
+                       "core_us": p["core_funds"]["us_stocks"], "final": final,
+                       "strategist_plan": strategy["plan"], "strategist_summary": strategy.get("summary"),
+                       "big_idea": strategy.get("big_idea"), "judge_verdicts": verdict.get("verdicts"),
+                       "judge_overall": verdict.get("overall"),
+                       "judge_response_to_reviewer": verdict.get("response_to_reviewer"),
+                       "review": review, "totals_before": totals, "projection": projection,
+                       "prices_at_plan": prices})
+        H.append_scorecard([{"week": str(today), "buy_date": str(buy), "ticker": i["ticker"], "role": i["role"],
+                             "amount": i["amount"], "price_at_plan": i.get("price_at_plan"),
+                             "judge_verdict": verdict_by_t.get(i["ticker"], "OK")} for i in final])
+        H.save_report(str(today), body)
 
-    body = render_sunday(p, plan, facts, strategy, verdict, final, table, buy)
     send(f"🧼 Retirement plan for {buy:%a %b %d}: ${p['weekly_budget']}", body,
          cfg["alerts"].get("email_to") or None, dry_run=dry_run or demo)
     return 0
+
+
+def _money(v):
+    return f"${v:,.0f}"
+
+
+def render_review(review, grade, totals, projection, verdict) -> str:
+    pr = projection
+    proj = (f"<table style='border-collapse:collapse;font-size:13px' border='1' cellpadding='5'>"
+            f"<tr><th></th><th>Low</th><th>Middle</th><th>High</th></tr>"
+            f"<tr><td>Worth at retirement</td><td>{_money(pr['low']['value'])}</td><td><b>{_money(pr['middle']['value'])}</b></td>"
+            f"<td>{_money(pr['high']['value'])}</td></tr>"
+            f"<tr><td>In today's dollars</td><td>{_money(pr['low']['todays_dollars'])}</td>"
+            f"<td><b>{_money(pr['middle']['todays_dollars'])}</b></td><td>{_money(pr['high']['todays_dollars'])}</td></tr>"
+            f"<tr><td>Avg yearly growth assumed</td><td>{pr['low']['avg_return']:.1%}</td><td>{pr['middle']['avg_return']:.1%}</td>"
+            f"<td>{pr['high']['avg_return']:.1%}</td></tr></table>"
+            f"<p style='font-size:12px;color:#555;margin:4px 0'>If you invest your weekly amount for {pr['years']} more years "
+            f"(about {_money(pr['you_put_in_future'])} more of your own money) and follow the Judge's plan. "
+            f"\"Today's dollars\" removes {pr['assumptions']['inflation']:.1%}/yr inflation so you can compare with prices now. "
+            f"Estimates, not promises.</p>")
+    rows = ""
+    for i in (grade or {}).get("items", []):
+        r, g = i["return"], i["gain"]
+        r_txt = "—" if r is None else f"{r:+.1%}"
+        g_txt = "—" if g is None else f"${g:+.2f}"
+        colour = "#15803d" if (r or 0) >= 0 else "#b91c1c"
+        rows += (f"<tr><td>{e(i['ticker'])}</td><td>${i['amount']}</td>"
+                 f"<td style='color:{colour}'>{r_txt}</td><td>{g_txt}</td></tr>")
+    calls = "".join(
+        f"<li>Judge rejected <b>{e(c['rejected'])}</b> ({c['rejected_return']:+.1%}) and chose {e(c['instead'])} "
+        f"({c['instead_return']:+.1%}): {e(c['outcome'])}.</li>" for c in (grade or {}).get("judge_calls", []))
+    errs = "".join(f"<li>{e(str(x))}</li>" for x in review.get("judge_errors", []))
+    so_far = (f"<p style='margin:4px 0'>Following the Judge for <b>{totals['weeks']} week(s)</b>: you'd have put in "
+              f"<b>{_money(totals['put_in'])}</b>, now worth about <b>{_money(totals['worth_now'])}</b> "
+              f"({totals['gain_pct']:+.1%}).</p>") if totals["weeks"] else ""
+    notes = "".join(f"<li><b>To the {who}:</b> {e(str(review.get('for_' + who.lower())))}</li>"
+                    for who in ("Researcher", "Strategist", "Judge") if review.get("for_" + who.lower()))
+    reply = verdict.get("response_to_reviewer")
+    return f"""<h3>0. Last week in review (Reviewer)</h3>
+<p style="margin:4px 0">{e(review.get('summary', ''))}</p>{so_far}
+{f"<table style='border-collapse:collapse;font-size:13px' border='1' cellpadding='4'><tr><th>Bought</th><th>Amount</th><th>Since plan</th><th>Gain</th></tr>{rows}</table>" if rows else ""}
+{f"<ul style='font-size:13px'>{calls}</ul>" if calls else ""}
+{f"<p style='margin:6px 0 2px;font-size:13px'><b>Errors the Reviewer found in the Judge:</b></p><ul style='font-size:13px'>{errs}</ul>" if errs else ""}
+{f"<p style='margin:6px 0 2px;font-size:13px'><b>Feedback sent to the team:</b></p><ul style='font-size:13px'>{notes}</ul>" if notes else ""}
+{f"<p style='margin:4px 0;font-size:13px;padding:6px 10px;background:#f5f5f4;border-radius:6px'><b>Judge replies:</b> {e(str(reply))}</p>" if reply else ""}
+{f"<p style='font-size:12px;color:#555'>{e(str(review.get('confidence_note')))}</p>" if review.get('confidence_note') else ""}
+<h4 style="margin:12px 0 4px">Projected retirement in {pr['years']} years</h4>{proj}
+<p style="font-size:11px;color:#888">Reviewer: {e(str(review.get('source', '')))}</p>"""
 
 
 def _pct(v):
     return "—" if v is None or v != v else f"{v:.0%}"
 
 
-def render_sunday(p, plan, facts, strategy, verdict, final, table, buy) -> str:
+def render_sunday(p, plan, facts, strategy, verdict, final, table, buy, review=None, grade=None, totals=None,
+                  projection=None) -> str:
     tgt, cur = plan["targets"], plan["current"]
     mix_rows = "".join(
         f"<tr><td>{e(k if k != 'SATELLITE' else 'Individual stocks')}</td><td>{_pct(v)}</td><td>{_pct(cur.get(k)) if cur else '—'}</td></tr>"
@@ -110,6 +204,7 @@ def render_sunday(p, plan, facts, strategy, verdict, final, table, buy) -> str:
 <h2 style="margin-bottom:4px">Your plan for {buy:%A, %B %d}</h2>
 <p style="margin-top:0;color:#555">${p['weekly_budget']} this week · {p['years_to_retirement']} years to retirement.
 You'll get a quick go/wait check that morning before the market opens.</p>
+{render_review(review, grade, totals, projection, verdict) if review else ""}
 <h3>1. What to buy on {buy:%A}</h3>
 <table style="border-collapse:collapse;width:100%" border="1" cellpadding="0">{buy_rows}</table>
 <h3>2. The Judge's review</h3>

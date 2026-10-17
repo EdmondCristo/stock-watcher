@@ -18,7 +18,10 @@ WEEKDAYS = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 
 
 
 def load_portfolio() -> dict:
-    return yaml.safe_load((ROOT / "portfolio.yaml").read_text())
+    p = yaml.safe_load((ROOT / "portfolio.yaml").read_text())
+    if p.get("retirement_year"):   # counts down automatically each year
+        p["years_to_retirement"] = max(0, int(p["retirement_year"]) - date.today().year)
+    return p
 
 
 def next_buy_date(today: date, buy_day: str) -> date:
