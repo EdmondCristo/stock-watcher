@@ -1,0 +1,43 @@
+name: Stock watch (market hours)
+
+on:
+  schedule:
+    - cron: "5,35 13-20 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run even if market is closed"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stock-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run watcher
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python main.py watch ${{ github.event.inputs.force == 'true' && '--force' || '' }}
+      - name: Save alert state
+        run: |
+          git config user.name "stock-watcher-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add state/ || true
+          git diff --cached --quiet || (git commit -m "update alert state [skip ci]" && git push)
