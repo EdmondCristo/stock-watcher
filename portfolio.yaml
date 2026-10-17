@@ -6,6 +6,7 @@
 weekly_budget: 75
 
 years_to_retirement: 24
+retirement_year: 2050   # counts down automatically, so the plan gets safer each year
 buy_day: Friday
 
 # The "core": broad, low-cost index funds — the main engine of growth.
@@ -30,3 +31,14 @@ holdings: {}
 #  BND: 12
 #  CL: 3
 #  PG: 3
+
+# Assumptions the Reviewer uses to project your retirement. Long-run yearly averages BEFORE inflation.
+# These are educated guesses, not promises — markets will be higher some years and lower others.
+projection:
+  us: 0.07
+  intl: 0.065
+  bonds: 0.04
+  satellite: 0.07
+  scenario_spread: 0.025     # low / high scenarios = middle minus / plus this
+  inflation: 0.025           # used to show the result in today's dollars
+  yearly_budget_increase: 0.0  # e.g. 0.03 if you'll raise your weekly amount 3% each year

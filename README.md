@@ -72,6 +72,14 @@ Every **Sunday** three AIs build your plan for the coming **Friday**:
 3. **Judge** checks every suggestion and marks it ✅ OK, ⚠️ risky, or ❌ wrong. Hard safety rules
    (budget, max 5% per stock, no buying right before earnings) always win, even over the AIs.
 
+Before them, a 4th AI — the **Reviewer** — grades last week's plan, checks whether the Judge's
+rejections helped or hurt, totals what you'd have if you followed the Judge every week, projects that
+to retirement (low / middle / high, plus in today's dollars), and sends written feedback that the
+other three read and the Judge replies to.
+
+Everything is saved in `state/history/`: one `…-plan.json` and a viewable `…-report.html` per week,
+`scorecard.csv` (every purchase), and `lessons.json` (the Reviewer's feedback).
+
 **Friday ~7:45 AM ET** you get a short go / wait email. If the stock jumped out of its buy range
 or bad news came out, its money moves into the US index fund instead.
 
