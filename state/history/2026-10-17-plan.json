@@ -31,7 +31,7 @@
     {
       "ticker": "JNJ",
       "amount": 11,
-      "reason": "Top-ranked essentials stock this week (score +3.19).",
+      "reason": "Top-ranked essentials stock this week (score +3.18).",
       "role": "satellite",
       "label": "Satellite: Johnson & Johnson",
       "buy_up_to": 263.23,
@@ -58,7 +58,7 @@
     {
       "ticker": "JNJ",
       "amount": 11,
-      "reason": "Top-ranked essentials stock this week (score +3.19)."
+      "reason": "Top-ranked essentials stock this week (score +3.18)."
     }
   ],
   "strategist_summary": "Following the standard plan: most money into broad index funds, a small slice into this week's top-ranked essentials stock.",
@@ -134,7 +134,7 @@
         {
           "ticker": "JNJ",
           "amount": 11,
-          "reason": "Top-ranked essentials stock this week (score +3.19)."
+          "reason": "Top-ranked essentials stock this week (score +3.18)."
         }
       ],
       "strategist_note": "Following the standard plan: most money into broad index funds, a small slice into this week's top-ranked essentials stock.",

@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-17T18:17:54.252289-04:00",
+  "created": "2026-10-17T18:21:03.455367-04:00",
   "buy_date": "2026-10-23",
   "budget": 75,
   "core_us": "VTI",
@@ -31,7 +31,7 @@
     {
       "ticker": "JNJ",
       "amount": 11,
-      "reason": "Top-ranked essentials stock this week (score +3.19).",
+      "reason": "Top-ranked essentials stock this week (score +3.18).",
       "role": "satellite",
       "label": "Satellite: Johnson & Johnson",
       "buy_up_to": 263.23,
