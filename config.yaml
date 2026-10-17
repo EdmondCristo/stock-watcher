@@ -1,0 +1,75 @@
+# ─────────────────────────────────────────────────────────────
+#  Stock Watcher configuration — edit this file, commit, done.
+# ─────────────────────────────────────────────────────────────
+
+# Stocks you intend to buy or sell. Alerts fire only for these.
+watchlist:
+  - PG
+  - CL
+  - CHD
+  - KMB
+  - AAPL
+
+indicators:
+  ema_period: 10        # EMA 10
+  bb_period: 20         # Bollinger middle band = 20-day SMA
+  bb_std: 2.0           # band width in standard deviations
+  # How close counts as "at the band". 0.05 = within 5% of the band width.
+  # 0 = price must actually touch or cross the band.
+  band_tolerance: 0.05
+
+probability:
+  horizon_days: 5       # "will it rise or fall over the next N trading days?"
+  lookback_years: 5     # history used to measure what happened after past signals
+  # How strongly news sentiment (-1..+1) shifts the historical odds (log-odds units).
+  # 1.0 = very negative news can move a 50/50 setup to roughly 27/73.
+  news_weight: 1.0
+  # Send the "likely to keep falling / rising" warning when probability ≥ this.
+  alert_threshold: 0.60
+
+news:
+  max_articles: 12
+  max_age_days: 7
+
+llm:
+  # gemini (free tier via Google AI Studio) | groq (free tier) | none (rule-based only)
+  provider: gemini
+  # "gemini-flash-latest" always points at Google's current Flash model,
+  # so it keeps working when Google retires older model versions.
+  model: gemini-flash-latest
+  groq_model: llama-3.3-70b-versatile
+
+alerts:
+  # Don't repeat the same alert for the same stock within this window.
+  cooldown_hours: 20
+  # Leave blank to send to the GMAIL_ADDRESS secret.
+  email_to: ""
+
+consultant:
+  # "People still need soap": essentials businesses — household & personal care,
+  # food & beverage, discount retail, healthcare, utilities, waste.
+  # Edit freely; tickers that fail to load are skipped.
+  universe:
+    - PG
+    - CL
+    - CHD
+    - KMB
+    - CLX
+    - UL
+    - KVUE
+    - ECL
+    - KO
+    - PEP
+    - MDLZ
+    - GIS
+    - HSY
+    - WMT
+    - COST
+    - DG
+    - JNJ
+    - ABT
+    - WM
+    - RSG
+    - NEE
+    - DUK
+  top_n: 6
