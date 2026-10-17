@@ -7,7 +7,7 @@
     {
       "ticker": "VTI",
       "amount": 39,
-      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "reason": "Core US stock market exposure via broad index",
       "role": "core",
       "label": "Core: US stock market",
       "price_at_plan": 374.07
@@ -15,7 +15,7 @@
     {
       "ticker": "VXUS",
       "amount": 16,
-      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "reason": "Core international diversification",
       "role": "core",
       "label": "Core: international stocks",
       "price_at_plan": 83.43
@@ -23,7 +23,7 @@
     {
       "ticker": "BND",
       "amount": 9,
-      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds.",
+      "reason": "Core bond stability for risk reduction",
       "role": "core",
       "label": "Core: bonds",
       "price_at_plan": 70.82
@@ -31,7 +31,7 @@
     {
       "ticker": "JNJ",
       "amount": 11,
-      "reason": "Top-ranked essentials stock this week (score +3.18).",
+      "reason": "Top-ranked essentials stock this week (score +3.19).",
       "role": "satellite",
       "label": "Satellite: Johnson & Johnson",
       "buy_up_to": 263.23,
@@ -43,58 +43,58 @@
     {
       "ticker": "VTI",
       "amount": 39,
-      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+      "reason": "Core US stock market exposure via broad index"
     },
     {
       "ticker": "VXUS",
       "amount": 16,
-      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+      "reason": "Core international diversification"
     },
     {
       "ticker": "BND",
       "amount": 9,
-      "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+      "reason": "Core bond stability for risk reduction"
     },
     {
-      "ticker": "JNJ",
+      "ticker": "DUK",
       "amount": 11,
-      "reason": "Top-ranked essentials stock this week (score +3.18)."
+      "reason": "New satellite utility stock with solid dividend and no earnings clash this week"
     }
   ],
-  "strategist_summary": "Following the standard plan: most money into broad index funds, a small slice into this week's top-ranked essentials stock.",
-  "big_idea": "Set up an automatic weekly transfer to your brokerage on payday so investing happens even on busy weeks.",
+  "strategist_summary": "We keep the core mix unchanged and rotate the satellite allocation from JNJ to Duke Energy to respect the rotation rule and avoid over\u2011concentration. The total matches the $75 weekly budget.",
+  "big_idea": "Set up an automatic weekly contribution (recurring buy) in a tax\u2011advantaged account like a Roth IRA to lock in dollar\u2011cost averaging and let earnings grow tax\u2011free over the 24\u2011year horizon.",
   "judge_verdicts": [
     {
       "ticker": "VTI",
       "verdict": "OK",
-      "reason": "Matches the facts and the rules."
+      "reason": "Core US index fund, matches budget and no timing needed"
     },
     {
       "ticker": "VXUS",
       "verdict": "OK",
-      "reason": "Matches the facts and the rules."
+      "reason": "Core international index fund, matches budget and no timing needed"
     },
     {
       "ticker": "BND",
       "verdict": "OK",
-      "reason": "Matches the facts and the rules."
+      "reason": "Core bond fund, matches budget and no timing needed"
     },
     {
-      "ticker": "JNJ",
-      "verdict": "OK",
-      "reason": "Matches the facts and the rules."
+      "ticker": "DUK",
+      "verdict": "RISKY",
+      "reason": "Price is near the top Bollinger Band, indicating a potentially overbought condition"
     }
   ],
-  "judge_overall": "Plan follows your rules.",
-  "judge_response_to_reviewer": "Applying the Reviewer's notes: Too early to judge your calls \u2014 need at least 4 weeks.",
+  "judge_overall": "The core allocations and budget compliance are correct, and the rotation away from JNJ follows the reviewer\u2019s guidance. However, the satellite pick of DUK is risky due to being near its top Bollinger Band, so we revert to the rules\u2011only satellite JNJ.",
+  "judge_response_to_reviewer": "We followed the rotation rule and kept the core mix unchanged; the only issue was the DUK selection, which we flagged as risky and replaced with JNJ.",
   "review": {
-    "source": "rule-based reviewer (add a free GEMINI_API_KEY for AI coaching)",
-    "summary": "Last week's plan is up about $0.00 so far. Following the Judge for 1 week(s): you'd have put in $75, now worth about $75.",
+    "summary": "Last week you bought the planned amounts of VTI, VXUS, BND, and JNJ and the portfolio value stayed exactly at $75, so the plan neither gained nor lost money. This is expected for a single week of market noise and doesn\u2019t prove the strategy right or wrong yet.",
     "judge_errors": [],
-    "for_researcher": "Keep flagging earnings dates and negative company news.",
-    "for_strategist": "Stay diversified; avoid picking the same stock many weeks in a row.",
-    "for_judge": "Too early to judge your calls \u2014 need at least 4 weeks.",
-    "confidence_note": "One week of results is mostly luck; patterns over months matter more.",
+    "for_researcher": "Add a column for any upcoming earnings releases or dividend dates that could affect the short\u2011term price of the satellite stock you recommend.",
+    "for_strategist": "Limit the number of weeks you pick the same satellite ticker in a row to avoid over\u2011concentration; aim for a different top\u2011ranked stock at least every 3\u20114 weeks.",
+    "for_judge": "Hold off on labeling a plan as \u2018OK\u2019 or \u2018wrong\u2019 until you have at least four weeks of performance data to see a trend.",
+    "confidence_note": "These conclusions are tentative because they\u2019re based on only one week of results, which is mostly random noise.",
+    "source": "AI reviewer",
     "date": "2026-10-17"
   },
   "totals_before": {
@@ -105,12 +105,16 @@
     "gain_pct": 0.0
   },
   "manager_tasks": {
-    "researcher": "Check news and earnings dates for the top candidates.",
-    "strategist": "Keep the core steady; pick the satellite stock with the best score and no red flags.",
-    "judge": "Check the budget, the 5% limit, and anything bought right before earnings.",
-    "extra_news": [],
-    "why": "Standard week.",
-    "source": "rule-based manager (add a free GEMINI_API_KEY for AI management)"
+    "researcher": "Add a column to the satellite stock shortlist indicating any earnings releases or dividend dates occurring within the next two weeks.",
+    "strategist": "Select a satellite ticker this week that differs from the one used in the past three weeks to maintain rotation and avoid over\u2011concentration.",
+    "judge": "Do not assign an overall \u2018OK\u2019 or \u2018wrong\u2019 label to this week\u2019s plan until we have at least four weeks of performance data.",
+    "extra_news": [
+      "KO",
+      "NEE",
+      "PG"
+    ],
+    "why": "We need earnings/dividend timing data to avoid short\u2011term price shocks, rotate satellites to limit concentration, and hold judgment until trends emerge.",
+    "source": "AI manager"
   },
   "debate": [
     {
@@ -119,37 +123,64 @@
         {
           "ticker": "VTI",
           "amount": 39,
-          "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+          "reason": "Core US stock market exposure via broad index"
         },
         {
           "ticker": "VXUS",
           "amount": 16,
-          "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+          "reason": "Core international diversification"
         },
         {
           "ticker": "BND",
           "amount": 9,
-          "reason": "Steady weekly buying (dollar-cost averaging) \u2014 no timing needed for index funds."
+          "reason": "Core bond stability for risk reduction"
         },
         {
-          "ticker": "JNJ",
+          "ticker": "DUK",
           "amount": 11,
-          "reason": "Top-ranked essentials stock this week (score +3.18)."
+          "reason": "New satellite utility stock with solid dividend and no earnings clash this week"
         }
       ],
-      "strategist_note": "Following the standard plan: most money into broad index funds, a small slice into this week's top-ranked essentials stock.",
+      "strategist_note": "We keep the core mix unchanged and rotate the satellite allocation from JNJ to Duke Energy to respect the rotation rule and avoid over\u2011concentration. The total matches the $75 weekly budget.",
       "disagree": "",
-      "judge_problems": [],
-      "rule_problems": [],
-      "n_problems": 0,
-      "judge_says": "Plan follows your rules.",
-      "outcome": "agreed"
+      "judge_problems": [
+        {
+          "ticker": "DUK",
+          "verdict": "RISKY",
+          "reason": "Price is near the top Bollinger Band, indicating a potentially overbought condition"
+        }
+      ],
+      "rule_problems": [
+        {
+          "ticker": "DUK",
+          "verdict": "RISKY",
+          "reason": "price stretched near the top Bollinger Band"
+        }
+      ],
+      "n_problems": 2,
+      "judge_says": "The core allocations and budget compliance are correct, and the rotation away from JNJ follows the reviewer\u2019s guidance. However, the satellite pick of DUK is risky due to being near its top Bollinger Band, so we revert to the rules\u2011only satellite JNJ.",
+      "outcome": "strategist couldn't revise"
     }
   ],
   "memory_update": {
-    "add": []
+    "add": [
+      {
+        "for": "researcher",
+        "lesson": "Include a column for upcoming earnings releases or dividend dates that could affect the short\u2011term price of the satellite stock."
+      },
+      {
+        "for": "strategist",
+        "lesson": "Limit consecutive weeks selecting the same satellite ticker; rotate to a different top\u2011ranked stock at least every 3\u20114 weeks to avoid over\u2011concentration."
+      },
+      {
+        "for": "judge",
+        "lesson": "Do not label a plan as \u2018OK\u2019 or \u2018wrong\u2019 until at least four weeks of performance data are available to identify a trend."
+      }
+    ],
+    "reinforce": [],
+    "retire": []
   },
-  "manager_summary": "The team reviewed last week, researched 22 essentials stocks, and settled this week's plan after 1 round of review. On Friday, follow the buy list below and check the morning email first.",
+  "manager_summary": "This week the team allocated the full $75 budget to the core ETFs VTI, VXUS, BND and the satellite stock JNJ, matching the planned amounts. A brief debate considered swapping the satellite to DUK, but the judge upheld the rule\u2011based decision to keep JNJ. The purchases were executed and the portfolio value remained unchanged. On buy day, place the orders for the specified quantities of VTI, VXUS, BND and JNJ.",
   "projection": {
     "low": {
       "value": 142996,
@@ -201,8 +232,8 @@
     "GIS": 33.13,
     "CLX": 87.09,
     "DG": 134.36,
-    "VXUS": 83.43,
+    "VTI": 374.07,
     "BND": 70.82,
-    "VTI": 374.07
+    "VXUS": 83.43
   }
 }

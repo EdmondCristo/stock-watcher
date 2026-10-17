@@ -1,12 +1,12 @@
 [
   {
-    "source": "rule-based reviewer (add a free GEMINI_API_KEY for AI coaching)",
-    "summary": "Last week's plan is up about $0.00 so far. Following the Judge for 1 week(s): you'd have put in $75, now worth about $75.",
+    "summary": "Last week you bought the planned amounts of VTI, VXUS, BND, and JNJ and the portfolio value stayed exactly at $75, so the plan neither gained nor lost money. This is expected for a single week of market noise and doesn\u2019t prove the strategy right or wrong yet.",
     "judge_errors": [],
-    "for_researcher": "Keep flagging earnings dates and negative company news.",
-    "for_strategist": "Stay diversified; avoid picking the same stock many weeks in a row.",
-    "for_judge": "Too early to judge your calls \u2014 need at least 4 weeks.",
-    "confidence_note": "One week of results is mostly luck; patterns over months matter more.",
+    "for_researcher": "Add a column for any upcoming earnings releases or dividend dates that could affect the short\u2011term price of the satellite stock you recommend.",
+    "for_strategist": "Limit the number of weeks you pick the same satellite ticker in a row to avoid over\u2011concentration; aim for a different top\u2011ranked stock at least every 3\u20114 weeks.",
+    "for_judge": "Hold off on labeling a plan as \u2018OK\u2019 or \u2018wrong\u2019 until you have at least four weeks of performance data to see a trend.",
+    "confidence_note": "These conclusions are tentative because they\u2019re based on only one week of results, which is mostly random noise.",
+    "source": "AI reviewer",
     "date": "2026-10-17"
   }
 ]
