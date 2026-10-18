@@ -4,23 +4,23 @@
     "for": "researcher",
     "lesson": "Include a column for upcoming earnings releases or dividend dates that could affect the short\u2011term price of the satellite stock.",
     "created": "2026-10-17",
-    "times_confirmed": 1,
-    "last_confirmed": "2026-10-17"
+    "times_confirmed": 2,
+    "last_confirmed": "2026-10-18"
   },
   {
     "id": "L2",
     "for": "strategist",
     "lesson": "Limit consecutive weeks selecting the same satellite ticker; rotate to a different top\u2011ranked stock at least every 3\u20114 weeks to avoid over\u2011concentration.",
     "created": "2026-10-17",
-    "times_confirmed": 1,
-    "last_confirmed": "2026-10-17"
+    "times_confirmed": 2,
+    "last_confirmed": "2026-10-18"
   },
   {
     "id": "L3",
     "for": "judge",
     "lesson": "Do not label a plan as \u2018OK\u2019 or \u2018wrong\u2019 until at least four weeks of performance data are available to identify a trend.",
     "created": "2026-10-17",
-    "times_confirmed": 1,
-    "last_confirmed": "2026-10-17"
+    "times_confirmed": 2,
+    "last_confirmed": "2026-10-18"
   }
 ]

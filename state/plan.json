@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-17T18:47:06.398271-04:00",
+  "created": "2026-10-18T12:38:07.960443-04:00",
   "buy_date": "2026-10-23",
   "budget": 75,
   "core_us": "VTI",
@@ -7,7 +7,7 @@
     {
       "ticker": "VTI",
       "amount": 39,
-      "reason": "Core US stock market exposure via broad index",
+      "reason": "Core US total market index, steady DCA aligns with target mix",
       "role": "core",
       "label": "Core: US stock market",
       "price_at_plan": 374.07
@@ -15,7 +15,7 @@
     {
       "ticker": "VXUS",
       "amount": 16,
-      "reason": "Core international diversification",
+      "reason": "Core international equity index, diversifies globally",
       "role": "core",
       "label": "Core: international stocks",
       "price_at_plan": 83.43
@@ -23,7 +23,7 @@
     {
       "ticker": "BND",
       "amount": 9,
-      "reason": "Core bond stability for risk reduction",
+      "reason": "Core bond fund for stability and income",
       "role": "core",
       "label": "Core: bonds",
       "price_at_plan": 70.82
@@ -31,7 +31,7 @@
     {
       "ticker": "JNJ",
       "amount": 11,
-      "reason": "Top-ranked essentials stock this week (score +3.19).",
+      "reason": "Top\u2011ranked healthcare stock, price comfortably within Bollinger Bands and no earnings clash this week",
       "role": "satellite",
       "label": "Satellite: Johnson & Johnson",
       "buy_up_to": 263.23,
