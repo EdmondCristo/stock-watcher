@@ -35,3 +35,7 @@ week,buy_date,ticker,role,amount,price_at_plan,judge_verdict
 2026-10-18,2026-10-23,VXUS,core,16,83.43,OK
 2026-10-18,2026-10-23,BND,core,9,70.82,OK
 2026-10-18,2026-10-23,JNJ,satellite,11,255.56,OK
+2026-10-25,2026-10-30,VTI,core,39,373.01,OK
+2026-10-25,2026-10-30,VXUS,core,16,82.53,OK
+2026-10-25,2026-10-30,BND,core,9,71.2,OK
+2026-10-25,2026-10-30,JNJ,satellite,11,263.81,OK

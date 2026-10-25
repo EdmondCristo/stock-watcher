@@ -1,42 +1,42 @@
 {
-  "created": "2026-10-18T12:38:07.960443-04:00",
-  "buy_date": "2026-10-23",
+  "created": "2026-10-25T13:06:48.248139-04:00",
+  "buy_date": "2026-10-30",
   "budget": 75,
   "core_us": "VTI",
   "items": [
     {
       "ticker": "VTI",
       "amount": 39,
-      "reason": "Core US total market index, steady DCA aligns with target mix",
+      "reason": "Core US stock market exposure via dollar\u2011cost averaging",
       "role": "core",
       "label": "Core: US stock market",
-      "price_at_plan": 374.07
+      "price_at_plan": 373.01
     },
     {
       "ticker": "VXUS",
       "amount": 16,
-      "reason": "Core international equity index, diversifies globally",
+      "reason": "Core international diversification via dollar\u2011cost averaging",
       "role": "core",
       "label": "Core: international stocks",
-      "price_at_plan": 83.43
+      "price_at_plan": 82.53
     },
     {
       "ticker": "BND",
       "amount": 9,
-      "reason": "Core bond fund for stability and income",
+      "reason": "Core bond exposure for stability via dollar\u2011cost averaging",
       "role": "core",
       "label": "Core: bonds",
-      "price_at_plan": 70.82
+      "price_at_plan": 71.2
     },
     {
       "ticker": "JNJ",
       "amount": 11,
-      "reason": "Top\u2011ranked healthcare stock, price comfortably within Bollinger Bands and no earnings clash this week",
+      "reason": "Satellite essentials stock; recent earnings beat and upcoming dividend (ex\u2011date 2026\u201111\u201124) make it attractive, and we\u2019ll cap its run at three consecutive weeks",
       "role": "satellite",
       "label": "Satellite: Johnson & Johnson",
-      "buy_up_to": 263.23,
-      "great_below": 246.98,
-      "price_at_plan": 255.56
+      "buy_up_to": 271.72,
+      "great_below": 247.39,
+      "price_at_plan": 263.81
     }
   ]
 }
